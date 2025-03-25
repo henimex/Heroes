@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,29 +37,38 @@ class MainActivity : ComponentActivity() {
             val navController= rememberNavController()
             HeroesTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Box(modifier = Modifier.padding(innerPadding)) {
-                        NavHost(navController = navController, startDestination = "list"){
+                    HeroApp(innerPadding, navController)
+                }
+            }
+        }
+    }
 
-                            composable("list") {
-                                generateData();
-                                HeroesList(heroes, navController);
-                            }
+    @Composable
+    private fun HeroApp(
+        innerPadding: PaddingValues,
+        navController: NavHostController
+    ) {
+        Box(modifier = Modifier.padding(innerPadding)) {
+            NavHost(navController = navController, startDestination = "list") {
 
-                            composable("details/{selectedHero}", arguments = listOf(
-                                navArgument("selectedHero"){
-                                    type = NavType.StringType
-                                }
-                            )) {
-                                val heroString = remember {
-                                    it.arguments?.getString("selectedHero")
-                                }
+                composable("list") {
+                    generateData();
+                    HeroesList(heroes, navController);
+                }
 
-                                val selectedHero = Gson().fromJson(heroString, Hero::class.java)
-
-                                HeroDetails(selectedHero)
-                            }
+                composable(
+                    "details/{selectedHero}", arguments = listOf(
+                        navArgument("selectedHero") {
+                            type = NavType.StringType
                         }
+                    )) {
+                    val heroString = remember {
+                        it.arguments?.getString("selectedHero")
                     }
+
+                    val selectedHero = Gson().fromJson(heroString, Hero::class.java)
+
+                    HeroDetails(selectedHero)
                 }
             }
         }
